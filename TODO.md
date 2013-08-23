@@ -1,0 +1,5 @@
+- Add decorator method to RuleSet class, which maps to add_rule
+- Add decorator for add_multiline_rule as well
+- Implement calling of rulesets
+- Add some helpful basic rulesets
+- Add some convenience functionality for loading rulesets and running them
