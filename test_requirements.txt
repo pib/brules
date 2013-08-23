@@ -1,0 +1,2 @@
+git+https://github.com/pib/nose.git@init_prefix_bug#egg=nose-1.3.0
+git+https://github.com/pib/nose-machineout.git@support_doctest#egg=nose-machineout-0.4-rc1
