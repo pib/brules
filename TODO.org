@@ -1,0 +1,8 @@
+* [4/7] TODOs
+  - [X] Implement calling of rulesets
+  - [X] Add decorator method to RuleSet class, which maps to add_rule
+  - [X] Add decorator for add_multiline_rule as well
+  - [X] Add the ability to combine rulesets
+  - [ ] Add some helpful basic rulesets
+  - [ ] Add some convenience functionality for loading rulesets and running them
+  - [ ] Add optional support for using something other than regexes for rule matching
