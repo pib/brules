@@ -6,7 +6,7 @@ class ParsingTest(TestCase):
     def setUp(self):
         self.rule_set = RuleSet()
 
-    def _ok(self, context):
+    def _ok(self, context, args):
         return 'ok'
 
     def test_plain_text_rule(self):

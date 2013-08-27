@@ -7,8 +7,26 @@ class UnmatchedRuleError(Exception):
 
 class RuleSet(object):
     def __init__(self):
+        self.context = AttrDict()
         self._rules = []
         self._multiline_rules = []
+
+    def run(self, step_text):
+        steps = self.parse(step_text)
+        for args, step in steps:
+            self.context['last_return'] = step(self.context, args)
+
+    def rule(self, pattern):
+        def attach_rule(f):
+            self.add_rule(pattern, f)
+            return f
+        return attach_rule
+
+    def multiline_rule(self, pattern):
+        def attach_multiline_rule(f):
+            self.add_multiline_rule(pattern, f)
+            return f
+        return attach_multiline_rule
 
     def add_rule(self, pattern, func):
         self._rules.append((re.compile(pattern), func))
@@ -27,8 +45,13 @@ class RuleSet(object):
                 line_end = toparse.find('\n', i)
                 if line_end == -1:
                     line_end = end
-                match = self._match_line(toparse[i:line_end])
+                line = toparse[i:line_end]
                 i = line_end + 1
+
+                if line.strip() == '':
+                    continue
+
+                match = self._match_line(line)
             matches.append(match)
         return matches
 
@@ -62,6 +85,18 @@ class RuleSet(object):
         raise UnmatchedRuleError('No matching rules for "{}"'.format(line))
 
     def _combined_match_dict(self, match):
-        match_dict = match.groupdict()
+        match_dict = AttrDict(match.groupdict())
         match_dict.update(enumerate(match.groups(), start=1))
         return match_dict
+
+
+class AttrDict(dict):
+    def __getattr__(self, name):
+        try:
+            return self[name]
+        except KeyError:
+            raise AttributeError("'{}' object has no attribute '{}'".format(
+                self.__class__.__name__, name))
+
+    def __setattr__(self, name, value):
+        self[name] = value
