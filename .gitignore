@@ -2,3 +2,4 @@ __pycache__
 .pyflymakerc*
 .run_nose
 *.egg-info
+*.pyc

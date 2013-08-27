@@ -1,5 +1,6 @@
 from unittest import TestCase
 from brules import RuleSet
+from brules.rules import RegexFuncRule as RFR
 from textwrap import dedent
 import re
 
@@ -20,8 +21,8 @@ class CallingTest(TestCase):
             context.bar = 'baz'
             return 'the end'
 
-        self.rule_set.add_rule('Set foo', set_foo)
-        self.rule_set.add_rule('Set bar', set_bar)
+        self.rule_set.add_rule(RFR('Set foo', set_foo))
+        self.rule_set.add_rule(RFR('Set bar', set_bar))
         self.rule_set.run('Set foo\nSet bar')
         self.assertEqual(self.rule_set.context.foo, 'bar')
         self.assertEqual(self.rule_set.context.last_return, 'the end')
@@ -36,10 +37,10 @@ class CallingTest(TestCase):
         def x_should_equal_y(context, args):
             self.assertEqual(str(context[args.x]), args.y)
 
-        self.rule_set.add_rule('Set (?P<x>.*) to (?P<y>.*)', set_x_to_y)
-        self.rule_set.add_rule('Add (?P<x>.*) to (?P<y>.*)', add_x_to_y)
-        self.rule_set.add_rule('(?P<x>.*) should equal (?P<y>.*)',
-                               x_should_equal_y)
+        self.rule_set.add_rule(RFR('Set (?P<x>.*) to (?P<y>.*)', set_x_to_y))
+        self.rule_set.add_rule(RFR('Add (?P<x>.*) to (?P<y>.*)', add_x_to_y))
+        self.rule_set.add_rule(RFR('(?P<x>.*) should equal (?P<y>.*)',
+                                   x_should_equal_y))
         self.rule_set.run(dedent("""\
             Set a to 1
             Set b to 3
@@ -57,7 +58,7 @@ class CallingTest(TestCase):
             return msg
 
         rule_re = r'([ /t]*)Message:\s*(?P<msg>.*(\n\1[ \t]+.+)*)'
-        self.rule_set.add_multiline_rule(rule_re, message)
+        self.rule_set.add_rule(RFR(rule_re, message, multiline=True))
         lines = dedent("""\
             Message: Hey there.
               This message is lots
