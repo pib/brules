@@ -1,4 +1,4 @@
-class UnmatchedRuleError(Exception):
+class UnmatchedStepError(Exception):
     pass
 
 

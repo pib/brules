@@ -1,42 +1,42 @@
-from .common import AttrDict, UnmatchedRuleError, combined_match_dict
-from .rules import RegexFuncRule
+from .common import AttrDict, UnmatchedStepError, combined_match_dict
+from .steps import RegexFuncStep
 
 
-class RuleSet(object):
+class StepSet(object):
     def __init__(self):
         self.context = AttrDict()
-        self._rules = []
-        self._multiline_rules = []
+        self._steps = []
+        self._multiline_steps = []
 
     def run(self, step_text):
         steps = self.parse(step_text)
-        for args, rule in steps:
-            self.context['last_return'] = rule(self.context, args)
+        for args, step in steps:
+            self.context['last_return'] = step(self.context, args)
 
     def concat(self, other):
-        new_rs = RuleSet()
-        for name in '_rules', '_multiline_rules':
+        new_rs = StepSet()
+        for name in '_steps', '_multiline_steps':
             new_list = getattr(self, name) + getattr(other, name)
             setattr(new_rs, name, new_list)
 
         return new_rs
 
-    def rule(self, pattern):
-        def attach_rule(f):
-            rule = RegexFuncRule(pattern, f)
-            self.add_rule(rule)
+    def step(self, pattern):
+        def attach_step(f):
+            step = RegexFuncStep(pattern, f)
+            self.add_step(step)
             return f
-        return attach_rule
+        return attach_step
 
-    def multiline_rule(self, pattern):
-        def attach_multiline_rule(f):
-            rule = RegexFuncRule(pattern, f, multiline=True)
-            self.add_rule(rule)
+    def multiline_step(self, pattern):
+        def attach_multiline_step(f):
+            step = RegexFuncStep(pattern, f, multiline=True)
+            self.add_step(step)
             return f
-        return attach_multiline_rule
+        return attach_multiline_step
 
-    def add_rule(self, rule):
-        self._rules.append(rule)
+    def add_step(self, step):
+        self._steps.append(step)
 
     def parse(self, toparse):
         matches = []
@@ -44,18 +44,18 @@ class RuleSet(object):
         end = len(toparse)
         while i < end:
             match_found = False
-            for rule in self._rules:
+            for step in self._steps:
                 try:
-                    match, i = rule.parse(toparse, i)
+                    match, i = step.parse(toparse, i)
                     matches.append(match)
                     match_found = True
-                except UnmatchedRuleError:
+                except UnmatchedStepError:
                     continue
             if not match_found:
                 line = toparse[i:].split('\n', 1)[0]
                 if line.strip() == '':
                     i += len(line) + 1
                     continue
-                raise UnmatchedRuleError(
-                    'No matching rules for "{}"'.format(line))
+                raise UnmatchedStepError(
+                    'No matching steps for "{}"'.format(line))
         return matches

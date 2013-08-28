@@ -1,23 +1,23 @@
 from unittest import TestCase
-from brules import RuleSet
+from brules import StepSet
 
 #pylint: disable=unused-variable, unused-argument
 
 
 class ConcatTest(TestCase):
     def test_concat(self):
-        rs1 = RuleSet()
-        rs2 = RuleSet()
+        rs1 = StepSet()
+        rs2 = StepSet()
 
-        @rs1.rule('Rule 1')
-        def rule1(ctx, args):
-            ctx.rule1 = True
+        @rs1.step('Step 1')
+        def step1(ctx, args):
+            ctx.step1 = True
 
-        @rs2.rule('Rule 2')
-        def rule2(ctx, args):
-            ctx.rule2 = True
+        @rs2.step('Step 2')
+        def step2(ctx, args):
+            ctx.step2 = True
 
         rs3 = rs1.concat(rs2)
-        rs3.run('Rule 1\nRule 2')
-        self.assertTrue(rs3.context.rule1)
-        self.assertTrue(rs3.context.rule2)
+        rs3.run('Step 1\nStep 2')
+        self.assertTrue(rs3.context.step1)
+        self.assertTrue(rs3.context.step2)

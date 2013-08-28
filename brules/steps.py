@@ -1,16 +1,16 @@
-from .common import UnmatchedRuleError, combined_match_dict
+from .common import UnmatchedStepError, combined_match_dict
 import re
 
 
-class Rule(object):
+class Step(object):
     def parse(self, toparse, start_index):
-        raise NotImplementedError('Rule subclasses must implement parse')
+        raise NotImplementedError('Step subclasses must implement parse')
 
     def __call__(self, context, args):
-        raise NotImplementedError('Rule subclasses must implement __call__')
+        raise NotImplementedError('Step subclasses must implement __call__')
 
 
-class RegexRule(Rule):
+class RegexStep(Step):
     def __init__(self, regex, multiline=False):
         self.multiline = multiline
         self.regex = re.compile(regex)
@@ -28,7 +28,7 @@ class RegexRule(Rule):
             end = match.end()
             return (match_dict, self), end
         line = toparse[start_index:].split('\n', 1)[0]
-        raise UnmatchedRuleError('Rule does not match at "{}"'.format(line))
+        raise UnmatchedStepError('Step does not match at "{}"'.format(line))
 
     def parse_line(self, toparse, start_index):
         end = len(toparse)
@@ -49,12 +49,12 @@ class RegexRule(Rule):
                 match_dict['suffix_content'] = line[end:]
 
             return (match_dict, self), line_end + 1
-        raise UnmatchedRuleError('Rule does not match at "{}"'.format(line))
+        raise UnmatchedStepError('Step does not match at "{}"'.format(line))
 
 
-class RegexFuncRule(RegexRule):
+class RegexFuncStep(RegexStep):
     def __init__(self, regex, func, multiline=False):
-        super(RegexFuncRule, self).__init__(regex, multiline)
+        super(RegexFuncStep, self).__init__(regex, multiline)
         self.func = func
 
     def __call__(self, context, args):
