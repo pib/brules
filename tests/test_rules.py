@@ -4,6 +4,7 @@ from brules.rules import Rule
 from textwrap import dedent
 
 from mock import Mock
+from os.path import dirname, join
 from unittest import TestCase
 
 
@@ -23,6 +24,7 @@ class RuleTest(TestCase):
             category: test rule
             points: 42
             ...
+            This bit: the step text.
             This bit: the step text.
             """)
 
@@ -52,7 +54,8 @@ class RuleTest(TestCase):
 
     def test_parse_steps(self):
         steps = self.rule.parse_steps(self.rule_text, 55)
-        expected = [({1: 'This bit: the step text.'}, self.step)]
+        expected = [({1: 'This bit: the step text.'}, self.step),
+                    ({1: 'This bit: the step text.'}, self.step)]
         self.assertEqual(steps, expected)
 
     def test_parse(self):
@@ -64,15 +67,38 @@ class RuleTest(TestCase):
             'points': 42}
         self.assertEqual(self.rule.metadata, expected_meta)
 
-        expected_steps = [({1: 'This bit: the step text.'}, self.step)]
+        expected_steps = [({1: 'This bit: the step text.'}, self.step),
+                          ({1: 'This bit: the step text.'}, self.step)]
         self.assertEqual(self.rule.steps, expected_steps)
 
     def test_run(self):
         self.rule.parse(self.rule_text)
-        self.rule.run('This bit: the step text.\nThis bit: the step text.')
+        self.rule.run()
         expected_ctx = {
             'calls': 2,
             'last_return': 'This bit: the step text.2'
         }
         self.assertEqual(self.rule.step_set.context, expected_ctx)
         self.assertIs(self.rule.context, self.rule.step_set.context)
+
+    def test_load(self):
+        self.rule.load(join(dirname(__file__), 'rules', 'simple.rule'))
+        expected_steps = [({1: 'This bit: the step text.'}, self.step),
+                          ({1: 'This bit: the step text.'}, self.step)]
+        self.assertEqual(self.rule.steps, expected_steps)
+
+    def test_load_directory(self):
+        rules = self.rule.load_directory(join(dirname(__file__), 'rules'))
+        expected_rules = [
+            ({'title': 'Another test rule',
+              'category': 'test rule',
+              'points': -12},
+             [({1: 'This bit: the step text.'}, self.step)]),
+            ({'title': 'Check yo self',
+              'category': 'test rule',
+              'points': 42},
+             [({1: 'This bit: the step text.'}, self.step),
+              ({1: 'This bit: the step text.'}, self.step)])
+        ]
+        self.assertEquals([(r.metadata, r.steps)
+                           for r in rules], expected_rules)

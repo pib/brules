@@ -8,8 +8,8 @@ class StepSet(object):
         self._steps = []
         self._multiline_steps = []
 
-    def run(self, step_text):
-        steps = self.parse(step_text)
+    def run(self, step_text=None, parsed_steps=None):
+        steps = parsed_steps or self.parse(step_text)
         for args, step in steps:
             self.context['last_return'] = step(self.context, args)
 

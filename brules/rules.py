@@ -5,6 +5,8 @@ from future.builtins import *
 
 from .stepset import StepSet
 from io import StringIO
+from os.path import join
+import glob
 import yaml
 
 
@@ -21,9 +23,28 @@ class Rule(object):
     def add_step_set(self, step_set):
         self.step_set = self.step_set.concat(step_set)
 
-    def run(self, torun):
-        self.step_set.run(torun)
+    def run(self):
+        self.step_set.run(parsed_steps=self.steps)
         self.context = self.step_set.context
+
+    def load(self, path):
+        content = open(path, 'r').read()
+        self.parse(content)
+
+    def load_directory(self, path, rule_ext='.rule'):
+        rules = []
+        rule_glob = join(path, '*{}'.format(rule_ext))
+        for rulepath in glob.iglob(rule_glob):
+            rule = self.copy()
+            rule.load(rulepath)
+            rules.append(rule)
+        return rules
+
+    def copy(self):
+        rule = Rule()
+        rule.context = self.context
+        rule.step_set = self.step_set
+        return rule
 
     def parse(self, toparse):
         self.metadata, i = self.parse_metadata(toparse, 0)
