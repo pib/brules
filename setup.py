@@ -27,7 +27,11 @@ setup(
         "License :: OSI Approved :: BSD License",
     ],
 
+    install_requires=['pyYAML', 'future'],
     dependency_links=dependency_links,
-    tests_require=['nose==1.3.0', 'nose-machineout==0.4-rc1', 'pyramid>=1.4'],
+    extras_require={
+        'lxml': ['lxml'],
+    },
+    tests_require=['nose==1.3.0', 'nose-machineout==0.4-rc1', 'lxml', 'mock'],
     test_suite='nose.collector',
 )

@@ -1,10 +1,12 @@
-from .steps import RegexStep
+from ..steps import RegexFuncStep
 import re
 
-offside_rule = r'\s*(?P<body>.*(\n\1[ \t]+.+)*)'
+offside_rule = r'[ /t]*(?P<body>.*(\n\1[ \t]+.+)*)'
 
 
-class IfThenSet(RegexStep):
+@RegexFuncStep.make(r'([ \t]*)If (?P<mod>so|not), then set (?P<name>.*) to:'
+                    + offside_rule, multiline=True)
+def if_then_set(context, args):
     """ Sets a variable to a given (optionally multiline) string,
     based on the return value of the previously run rule. Returns that
     same return value so multiple instances can be chained
@@ -22,13 +24,11 @@ class IfThenSet(RegexStep):
          It continues to continue on this line.
           And this one.
     """
-    def __init__(self):
-        regex = 'If (?P<mod>so|not), then set (?P<name>.*) to:' + offside_rule
-        super(IfThenSet, self).__init__(regex, multiline=True)
-
-    def __call__(self, context, args):
-        if (args.mod == 'so' and context.last_return) \
-                or (args.mod == 'not' and not context.last_return):
-            body = re.sub(r'\s+', ' ', args.body.strip())
-            context[args.name] = body
-        return context.last_return
+    if (args.mod == 'so' and context.last_return) \
+            or (args.mod == 'not' and not context.last_return):
+        body = re.sub(r'\s+', ' ', args.body.strip())
+        print('setting "{}" to "{}"'.format(args.name, body))
+        context[args.name] = body
+    else:
+        print('not setting "{}" to "{}"'.format(args.name, args.body))
+    return context.last_return

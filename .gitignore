@@ -3,3 +3,6 @@ __pycache__
 .run_nose
 *.egg-info
 *.pyc
+.tox
+.coverage
+cover

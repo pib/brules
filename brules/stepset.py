@@ -38,9 +38,9 @@ class StepSet(object):
     def add_step(self, step):
         self._steps.append(step)
 
-    def parse(self, toparse):
+    def parse(self, toparse, start_index=0):
         matches = []
-        i = 0
+        i = start_index
         end = len(toparse)
         while i < end:
             match_found = False

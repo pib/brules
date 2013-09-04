@@ -7,8 +7,7 @@ class ParsingTest(TestCase):
     def setUp(self):
         self.step_set = StepSet()
 
-    def _ok(self, context, args):  # pylint: disable=unused-argument
-        return 'ok'
+    _ok = 'NOT REALLY A FUNCTION'
 
     def test_plain_text_step(self):
         step = RegexFuncStep("I'm a step!", self._ok)

@@ -59,3 +59,13 @@ class RegexFuncStep(RegexStep):
 
     def __call__(self, context, args):
         return self.func(context, args)
+
+    @classmethod
+    def make(cls, regex, multiline=False):
+        """Decorator which wraps the specified regex and func in a
+        RegexFuncStep instance
+        """
+        def make_inst(func):
+            return cls(regex, func, multiline)
+
+        return make_inst
