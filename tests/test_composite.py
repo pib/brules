@@ -1,5 +1,5 @@
 from unittest import TestCase
-from brules import StepSet, UnmatchedStepError
+from brules import StepSet
 from brules.steps import PredicateStep, RegexFuncStep, YamlFuncStep
 
 
@@ -31,10 +31,29 @@ if foo is blah then
   a: 2
   b: nope
 if foo is bar then
-  a: 42
-  b: yep
+  c: 42
+  d: yep
 """
         steps = self.step_set.parse(rule)
         expected = [
-            ({}, )
+            ({1: 'foo', 2: 'bar', 'x': 'foo', 'y': 'bar'}, self.set_step),
+            ({1: 'foo', 2: 'blah', 'x': 'foo', 'y': 'blah', 'a': 2,
+              'b': 'nope'},
+             pred_step),
+            ({1: 'foo', 2: 'bar', 'x': 'foo', 'y': 'bar', 'c': 42,
+              'd': 'yep'},
+             pred_step)
         ]
+        self.assertEquals(steps, expected)
+        self.step_set.run(rule)
+        expected = {
+            'foo': 'bar',
+            'c': 42,
+            'd': 'yep',
+            1: 'foo',
+            2: 'bar',
+            'x': 'foo',
+            'y': 'bar',
+            'last_return': None
+        }
+        self.assertEquals(self.step_set.context, expected)
