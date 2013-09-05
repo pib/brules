@@ -19,7 +19,7 @@ class RuleTest(TestCase):
         self.step = RegexFuncStep('(.+)', step_fn)
         self.rule.step_set.add_step(self.step)
 
-        self.rule_text = dedent("""\
+        self.rule_text = dedent(u"""\
             title: Check yo self
             category: test rule
             points: 42

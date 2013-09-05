@@ -3,6 +3,7 @@ from __future__ import (division, absolute_import, print_function,
 from future import standard_library
 from future.builtins import *
 
+from .common import u
 from .stepset import StepSet
 from io import StringIO
 from os.path import join
@@ -51,7 +52,7 @@ class Rule(object):
         self.steps = self.parse_steps(toparse, i)
 
     def parse_metadata(self, rule_text, start_index):
-        rule_io = StringIO(rule_text)
+        rule_io = StringIO(u(rule_text))
         rule_io.seek(start_index, 0)
 
         loader = yaml.Loader(rule_io)

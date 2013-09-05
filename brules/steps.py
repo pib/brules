@@ -1,5 +1,12 @@
-from .common import UnmatchedStepError, combined_match_dict
+from __future__ import (division, absolute_import, print_function,
+                        unicode_literals)
+from future import standard_library
+from future.builtins import *
+
+from .common import UnmatchedStepError, combined_match_dict, u
+from io import StringIO
 import re
+import yaml
 
 
 class Step(object):
@@ -69,3 +76,56 @@ class RegexFuncStep(RegexStep):
             return cls(regex, func, multiline)
 
         return make_inst
+
+
+class YamlStep(Step):
+    def parse(self, toparse, start_index):
+        step_io = StringIO(u(toparse))
+        step_io.seek(start_index, 0)
+
+        loader = yaml.Loader(step_io)
+        try:
+            val = loader.get_data()
+        except yaml.error.YAMLError:
+            line = toparse[start_index:].split('\n', 1)[0]
+            raise UnmatchedStepError('Step does not match at "{}"'.format(line))
+
+        if loader.tokens:
+            val_end = loader.tokens[0].start_mark.index
+        else:
+            val_end = loader.get_mark().index
+        return (val, self), start_index + val_end
+
+
+class YamlFuncStep(YamlStep):
+    def __init__(self, func):
+        self.func = func
+
+    def __call__(self, context, args):
+        return self.func(context, args)
+
+
+class PredicateStep(Step):
+    """ A composite of two other steps, a predicate step, and a
+    conditional step.
+
+    When parsing, both steps must parse, or the step doesn't match.
+
+    When running, if the predicate step returns a truthy value, then
+    the conditional step is run. Otherwise, the conditional step is
+    not run.
+    """
+
+    def __init__(self, predicate, conditional):
+        self.predicate = predicate
+        self.conditional = conditional
+
+    def parse(self, toparse, start_index):
+        (args, _), i = self.predicate.parse(toparse, start_index)
+        (args2, _), i = self.conditional.parse(toparse, i)
+        args.update(args2)
+        return (args, self), i
+
+    def __call__(self, context, args):
+        if self.predicate(context, args):
+            self.conditional(context, args)

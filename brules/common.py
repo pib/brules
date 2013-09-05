@@ -1,3 +1,6 @@
+from future.utils.six import text_type
+
+
 class UnmatchedStepError(Exception):
     pass
 
@@ -18,3 +21,9 @@ def combined_match_dict(match):
     match_dict = AttrDict(match.groupdict())
     match_dict.update(enumerate(match.groups(), start=1))
     return match_dict
+
+
+def u(bytes_or_str):
+    if not isinstance(bytes_or_str, text_type):
+        return bytes_or_str.decode('utf-8')
+    return bytes_or_str
