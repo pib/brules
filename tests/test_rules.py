@@ -71,12 +71,17 @@ class RuleTest(TestCase):
                           ({1: 'This bit: the step text.'}, self.step)]
         self.assertEqual(self.rule.steps, expected_steps)
 
+    def test_parse_no_metadata(self):
+        self.rule.parse('No YAML here\nThis bit: the step text.')
+        self.assertEqual(self.rule.metadata, {})
+
     def test_run(self):
         self.rule.parse(self.rule_text)
-        self.rule.run()
+        self.rule.run(extra_context_arg=42)
         expected_ctx = {
             'calls': 2,
-            'last_return': 'This bit: the step text.2'
+            'last_return': 'This bit: the step text.2',
+            'extra_context_arg': 42
         }
         self.assertEqual(self.rule.step_set.context, expected_ctx)
         self.assertIs(self.rule.context, self.rule.step_set.context)

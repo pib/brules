@@ -1,5 +1,9 @@
 from ..steps import RegexFuncStep
+from ..stepset import StepSet
+import logging
 import re
+
+log = logging.getLogger(__name__)
 
 offside_rule = r'[ /t]*(?P<body>.*(\n\1[ \t]+.+)*)'
 
@@ -27,8 +31,26 @@ def if_then_set(context, args):
     if (args.mod == 'so' and context.last_return) \
             or (args.mod == 'not' and not context.last_return):
         body = re.sub(r'\s+', ' ', args.body.strip())
-        print('setting "{}" to "{}"'.format(args.name, body))
+        log.debug('setting "%s" to "%s"', args.name, body)
         context[args.name] = body
     else:
-        print('not setting "{}" to "{}"'.format(args.name, args.body))
+        log.debug('not setting "%s" to "%s"', args.name, body)
     return context.last_return
+
+
+@RegexFuncStep.make(r'([ \t]*)If (?P<mod>so|not), then append to (?P<name>.*):'
+                    + offside_rule, multiline=True)
+def if_then_append(context, args):
+    """ Like if_then_set, but builds up a list instead of setting a
+    single variable
+    """
+    if (args.mod == 'so' and context.last_return) \
+            or (args.mod == 'not' and not context.last_return):
+        body = re.sub(r'\s+', ' ', args.body.strip())
+        log.debug('appending "%s" to "%s"'.format(body, args.name))
+        context.setdefault(args.name, []).append(body)
+    else:
+        log.debug('not appending "{}" to "{}"'.format(args.body, args.name))
+    return context.last_return
+
+basic_step_set = StepSet(if_then_set, if_then_append)

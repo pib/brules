@@ -3,7 +3,7 @@ from __future__ import (division, absolute_import, print_function,
 from future import standard_library
 from future.builtins import *
 
-from .common import u
+from .common import AttrDict, u
 from .stepset import StepSet
 from io import StringIO
 from os.path import join
@@ -14,8 +14,8 @@ import yaml
 class Rule(object):
     def __init__(self):
         self.step_set = StepSet()
-        self.context = {}
-        self.metadata = {}
+        self.context = AttrDict()
+        self.metadata = AttrDict()
         self.steps = []
 
     def add_step(self, step):
@@ -24,7 +24,8 @@ class Rule(object):
     def add_step_set(self, step_set):
         self.step_set = self.step_set.concat(step_set)
 
-    def run(self):
+    def run(self, **extra_context):
+        self.step_set.context.update(extra_context)
         self.step_set.run(parsed_steps=self.steps)
         self.context = self.step_set.context
 
@@ -48,7 +49,11 @@ class Rule(object):
         return rule
 
     def parse(self, toparse):
-        self.metadata, i = self.parse_metadata(toparse, 0)
+        try:
+            self.metadata, i = self.parse_metadata(toparse, 0)
+        except yaml.error.YAMLError:
+            i = 0
+
         self.steps = self.parse_steps(toparse, i)
 
     def parse_metadata(self, rule_text, start_index):

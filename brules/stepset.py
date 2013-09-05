@@ -1,12 +1,11 @@
-from .common import AttrDict, UnmatchedStepError, combined_match_dict
+from .common import AttrDict, UnmatchedStepError
 from .steps import RegexFuncStep
 
 
 class StepSet(object):
-    def __init__(self):
+    def __init__(self, *steps):
         self.context = AttrDict()
-        self._steps = []
-        self._multiline_steps = []
+        self._steps = list(steps)
 
     def run(self, step_text=None, parsed_steps=None):
         steps = parsed_steps or self.parse(step_text)
@@ -15,7 +14,7 @@ class StepSet(object):
 
     def concat(self, other):
         new_rs = StepSet()
-        for name in '_steps', '_multiline_steps':
+        for name in ('_steps',):
             new_list = getattr(self, name) + getattr(other, name)
             setattr(new_rs, name, new_list)
 
