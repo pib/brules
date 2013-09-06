@@ -39,4 +39,4 @@ class YamlTest(TestCase):
             ({'foo': 'bar'}, self.yaml_step),
             ({}, re_step)
         ]
-        self.assertEquals(steps, expected)
+        self.assertEqual(steps, expected)

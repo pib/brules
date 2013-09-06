@@ -105,5 +105,5 @@ class RuleTest(TestCase):
              [({1: 'This bit: the step text.'}, self.step),
               ({1: 'This bit: the step text.'}, self.step)])
         ]
-        self.assertEquals([(r.metadata, r.steps)
+        self.assertEqual([(r.metadata, r.steps)
                            for r in rules], expected_rules)
