@@ -104,6 +104,13 @@ class YamlFuncStep(YamlStep):
     def __call__(self, context, args):
         return self.func(context, args)
 
+    @classmethod
+    def make(cls, func):
+        """Decorator which wraps the specified func in a
+        YamlFuncStep instance
+        """
+        return cls(func)
+
 
 class PredicateStep(Step):
     """ A composite of two other steps, a predicate step, and a
@@ -127,5 +134,9 @@ class PredicateStep(Step):
         return (args, self), i
 
     def __call__(self, context, args):
+        last_return = context.last_return
+
         if self.predicate(context, args):
             self.conditional(context, args)
+
+        return last_return

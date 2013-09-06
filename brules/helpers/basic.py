@@ -1,4 +1,4 @@
-from ..steps import RegexFuncStep
+from ..steps import RegexFuncStep, YamlFuncStep, PredicateStep
 from ..stepset import StepSet
 import logging
 import re
@@ -34,7 +34,7 @@ def if_then_set(context, args):
         log.debug('setting "%s" to "%s"', args.name, body)
         context[args.name] = body
     else:
-        log.debug('not setting "%s" to "%s"', args.name, body)
+        log.debug('not setting "%s" to "%s"', args.name, args.body)
     return context.last_return
 
 
@@ -53,4 +53,20 @@ def if_then_append(context, args):
         log.debug('not appending "{}" to "{}"'.format(args.body, args.name))
     return context.last_return
 
-basic_step_set = StepSet(if_then_set, if_then_append)
+
+@RegexFuncStep.make(r'([ \t]*)If (?P<mod>so|not), then set:')
+def if_then_true(context, args):
+    """ Like if_then_set, but builds up a list instead of setting a
+    single variable
+    """
+    return (args.mod == 'so' and context.last_return) \
+        or (args.mod == 'not' and not context.last_return)
+
+
+@YamlFuncStep.make
+def set_yaml(context, args):
+    context.update(args)
+
+if_then_set_yaml = PredicateStep(if_then_true, set_yaml)
+
+basic_step_set = StepSet(if_then_set, if_then_append, if_then_set_yaml)
