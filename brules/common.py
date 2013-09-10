@@ -5,7 +5,7 @@ class UnmatchedStepError(Exception):
     pass
 
 
-class AttrDict(dict):
+class Context(dict):
     def __getattr__(self, name):
         try:
             return self[name]
@@ -18,7 +18,7 @@ class AttrDict(dict):
 
 
 def combined_match_dict(match):
-    match_dict = AttrDict(match.groupdict())
+    match_dict = Context(match.groupdict())
     match_dict.update(enumerate(match.groups(), start=1))
     return match_dict
 

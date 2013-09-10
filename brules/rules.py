@@ -3,7 +3,7 @@ from __future__ import (division, absolute_import, print_function,
 from future import standard_library
 from future.builtins import *
 
-from .common import AttrDict, u
+from .common import Context, u
 from .stepset import StepSet
 from io import StringIO
 from os.path import join
@@ -15,8 +15,8 @@ import yaml
 class Rule(object):
     def __init__(self):
         self.step_set = StepSet()
-        self.context = AttrDict()
-        self.metadata = AttrDict()
+        self.context = Context()
+        self.metadata = Context()
         self.steps = []
         self.file_path = None
 
@@ -48,7 +48,7 @@ class Rule(object):
     def copy(self):
         rule = Rule()
         rule.step_set = copy.copy(self.step_set)
-        rule.step_set.context = AttrDict(self.context)
+        rule.step_set.context = Context(self.context)
         return rule
 
     def parse(self, toparse):

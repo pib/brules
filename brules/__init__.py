@@ -1,3 +1,3 @@
-from .common import AttrDict, UnmatchedStepError
+from .common import Context, UnmatchedStepError
 from .stepset import StepSet
 from .rules import Rule

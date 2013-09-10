@@ -1,10 +1,10 @@
-from .common import AttrDict, UnmatchedStepError
+from .common import Context, UnmatchedStepError
 from .steps import RegexFuncStep
 
 
 class StepSet(object):
     def __init__(self, *steps):
-        self.context = AttrDict()
+        self.context = Context()
         self._steps = list(steps)
 
     def run(self, step_text=None, parsed_steps=None):
