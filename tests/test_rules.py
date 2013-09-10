@@ -72,8 +72,9 @@ class RuleTest(TestCase):
         self.assertEqual(self.rule.steps, expected_steps)
 
     def test_parse_no_metadata(self):
-        self.rule.parse('No YAML here\nThis bit: the step text.')
+        self.rule.parse('No YAML here')
         self.assertEqual(self.rule.metadata, {})
+        self.assertEqual(self.rule.steps, [({1: 'No YAML here'}, self.step)])
 
     def test_run(self):
         self.rule.parse(self.rule_text)
@@ -87,10 +88,12 @@ class RuleTest(TestCase):
         self.assertIs(self.rule.context, self.rule.step_set.context)
 
     def test_load(self):
-        self.rule.load(join(dirname(__file__), 'rules', 'simple.rule'))
+        file_path = join(dirname(__file__), 'rules', 'simple.rule')
+        self.rule.load(file_path)
         expected_steps = [({1: 'This bit: the step text.'}, self.step),
                           ({1: 'This bit: the step text.'}, self.step)]
         self.assertEqual(self.rule.steps, expected_steps)
+        self.assertEqual(self.rule.file_path, file_path)
 
     def test_load_directory(self):
         rules = self.rule.load_directory(join(dirname(__file__), 'rules'))
@@ -106,4 +109,4 @@ class RuleTest(TestCase):
               ({1: 'This bit: the step text.'}, self.step)])
         ]
         self.assertEqual([(r.metadata, r.steps)
-                           for r in rules], expected_rules)
+                          for r in rules], expected_rules)

@@ -7,6 +7,7 @@ from .common import AttrDict, u
 from .stepset import StepSet
 from io import StringIO
 from os.path import join
+import copy
 import glob
 import yaml
 
@@ -17,6 +18,7 @@ class Rule(object):
         self.context = AttrDict()
         self.metadata = AttrDict()
         self.steps = []
+        self.file_path = None
 
     def add_step(self, step):
         self.step_set.add_step(step)
@@ -32,6 +34,7 @@ class Rule(object):
     def load(self, path):
         content = open(path, 'r').read()
         self.parse(content)
+        self.file_path = path
 
     def load_directory(self, path, rule_ext='.rule'):
         rules = []
@@ -44,8 +47,8 @@ class Rule(object):
 
     def copy(self):
         rule = Rule()
-        rule.context = self.context
-        rule.step_set = self.step_set
+        rule.step_set = copy.copy(self.step_set)
+        rule.step_set.context = AttrDict(self.context)
         return rule
 
     def parse(self, toparse):
@@ -61,7 +64,9 @@ class Rule(object):
         rule_io.seek(start_index, 0)
 
         loader = yaml.Loader(rule_io)
-        metadata = loader.get_data()
+        loader.check_node()
+        node = loader.get_node()
+        metadata = loader.construct_mapping(node)
         metadata_end = loader.get_mark().index
         return metadata, metadata_end
 
