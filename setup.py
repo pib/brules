@@ -26,6 +26,11 @@ setup(
         "Topic :: Utilities",
         "License :: OSI Approved :: BSD License",
     ],
+    entry_points={
+        'console_scripts': [
+            'brules = brules.scripts.brules:run'
+        ]
+    },
 
     install_requires=['pyYAML', 'future'],
     dependency_links=dependency_links,
