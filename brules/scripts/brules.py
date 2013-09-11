@@ -3,6 +3,7 @@ from __future__ import (division, absolute_import, print_function,
 from future import standard_library
 from future.builtins import *
 
+from brules import Context
 from brules.rules import Rule
 from brules.helpers.basic import basic_step_set
 from brules.helpers.html import html_step_set
@@ -14,6 +15,7 @@ try:
 except ImportError:
     from urllib2 import urlopen
 
+from importlib import import_module
 import logging
 
 log = logging.getLogger(__name__)
@@ -30,22 +32,39 @@ def main(argv):
     parser.add_argument('-d', '--dir', default='rules', required=False)
     parser.add_argument('-D', '--debug', default=False, action='store_true')
     parser.add_argument('-v', '--verbose', default=False, action='store_true')
+    parser.add_argument('-s', '--extra-stepset', default=None,
+                        help="i.e. package.mod:step_set")
+    parser.add_argument('-c', '--context-factory', default=None,
+                        help="i.e. package.mod:ContextSubclass")
     args = parser.parse_args(argv)
 
     if args.debug:
         logging.basicConfig(level=logging.DEBUG)
 
-    rules = load_rules(args.dir)
     etree = load_url(args.url)
-    run_rules(rules, etree, args.url)
+    ctx_class = (load_mod_var(args.context_factory)
+                 if args.context_factory else Context)
+
+    context = ctx_class(etree=etree, url=args.url)
+    rules = load_rules(args.dir, args.extra_stepset, context)
+    run_rules(rules)
     print_results(rules, args.verbose)
 
 
-def load_rules(rule_dir):
+def load_rules(rule_dir, extra_stepset, context):
     base_rule = Rule()
+    base_rule.context = context
+    if extra_stepset:
+        base_rule.add_step_set(load_mod_var(extra_stepset))
     base_rule.add_step_set(basic_step_set)
     base_rule.add_step_set(html_step_set)
     return base_rule.load_directory(rule_dir)
+
+
+def load_mod_var(var_path):
+    mod_name, var_name = var_path.split(':')
+    mod = import_module(mod_name)
+    return getattr(mod, var_name)
 
 
 def load_url(url):
@@ -56,9 +75,9 @@ def load_url(url):
     return parse(req)
 
 
-def run_rules(rules, etree, url):
+def run_rules(rules):
     for rule in rules:
-        rule.run(etree=etree, url=url)
+        rule.run()
 
 
 def print_results(rules, verbose):

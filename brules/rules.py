@@ -48,7 +48,7 @@ class Rule(object):
     def copy(self):
         rule = Rule()
         rule.step_set = copy.copy(self.step_set)
-        rule.step_set.context = Context(self.context)
+        rule.step_set.context = self.context.copy()
         return rule
 
     def parse(self, toparse):

@@ -58,6 +58,11 @@ class RegexStep(Step):
             return (match_dict, self), line_end + 1
         raise UnmatchedStepError('Step does not match at "{}"'.format(line))
 
+    def __repr__(self):
+        return '<{}.{} "{}">'.format(self.__class__.__module__,
+                                     self.__class__.__name__,
+                                     self.regex.pattern)
+
 
 class RegexFuncStep(RegexStep):
     def __init__(self, regex, func, multiline=False):
@@ -76,6 +81,12 @@ class RegexFuncStep(RegexStep):
             return cls(regex, func, multiline)
 
         return make_inst
+
+    def __repr__(self):
+        return '<{}.{} {}.{} "{}">'.format(
+            self.__class__.__module__, self.__class__.__name__,
+            self.func.__module__, self.func.__name__,
+            self.regex.pattern)
 
 
 class YamlStep(Step):

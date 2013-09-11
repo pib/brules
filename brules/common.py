@@ -16,6 +16,9 @@ class Context(dict):
     def __setattr__(self, name, value):
         self[name] = value
 
+    def copy(self):
+        return self.__class__(super(Context, self).copy())
+
 
 def combined_match_dict(match):
     match_dict = Context(match.groupdict())

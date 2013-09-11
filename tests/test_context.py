@@ -1,10 +1,10 @@
-from brules.common import AttrDict
+from brules.common import Context
 from unittest import TestCase
 
 
-class AttrDictTest(TestCase):
+class ContextTest(TestCase):
     def setUp(self):
-        self.d = AttrDict({'foo': 'bar', 'bar': 'baz'})
+        self.d = Context({'foo': 'bar', 'bar': 'baz'})
 
     def test_get_existing(self):
         self.assertEqual(self.d.foo, 'bar')
