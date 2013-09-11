@@ -16,6 +16,7 @@ except ImportError:
     from urllib2 import urlopen
 
 from importlib import import_module
+import json
 import logging
 
 log = logging.getLogger(__name__)
@@ -36,6 +37,7 @@ def main(argv):
                         help="i.e. package.mod:step_set")
     parser.add_argument('-c', '--context-factory', default=None,
                         help="i.e. package.mod:ContextSubclass")
+    parser.add_argument('-o', '--output', default='brule_output.json')
     args = parser.parse_args(argv)
 
     if args.debug:
@@ -49,6 +51,7 @@ def main(argv):
     rules = load_rules(args.dir, args.extra_stepset, context)
     run_rules(rules)
     print_results(rules, args.verbose)
+    write_results(rules, args.output)
 
 
 def load_rules(rule_dir, extra_stepset, context):
@@ -92,6 +95,17 @@ def print_results(rules, verbose):
             keylen = max(len(str(k)) for k in rule.context) + 1
             for k, v in rule.context.items():
                 print('  {}: {}'.format(str(k).ljust(keylen), v))
+
+
+def write_results(rules, output):
+    result = [{'metadata': r.metadata, 'context': r.context} for r in rules]
+    with open(output, 'w') as f:
+        json.dump(result, f, cls=LaxEncoder)
+
+
+class LaxEncoder(json.JSONEncoder):
+    def default(self, obj):
+        return repr(obj)
 
 
 def red(txt):

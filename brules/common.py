@@ -17,7 +17,9 @@ class Context(dict):
         self[name] = value
 
     def copy(self):
-        return self.__class__(super(Context, self).copy())
+        new_inst = self.__class__()
+        new_inst.update(super(Context, self).copy())
+        return new_inst
 
 
 def combined_match_dict(match):
