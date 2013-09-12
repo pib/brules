@@ -15,7 +15,11 @@ chars_words = '(?P<chars_words>characters|words)'
 def check_tag_exists(context, args):
     # Does the page have a title tag?
     tag = context.etree.find('.//' + args.tag)
-    return tag is not None
+    if tag is not None:
+        context.referenced_elements = [tag]
+        return True
+    else:
+        return False
 
 
 @RegexFuncStep.make(r'Does the {} {} have {} than {} {}\?'.format(
@@ -23,10 +27,12 @@ def check_tag_exists(context, args):
 def check_tag_length(context, args):
     if args.tag_attr == 'attribute':
         # Does the content attribute have less than 160 characters?
-        txt = context.selected_tag.attrib[args.name]
+        txt = context.referenced_elements[0].attrib[args.name]
     else:
         # Does the title tag have less than 60 characters?
-        txt = context.etree.find('.//' + args.name).text_content()
+        elem = context.etree.find('.//' + args.name)
+        context.referenced_elements = [elem]
+        txt = elem.text_content()
 
     if args.chars_words == 'characters':
         tag_length = len(txt)
@@ -42,10 +48,10 @@ def check_tag_length(context, args):
 @RegexFuncStep.make(r'Given the {} tag with the attribute {}={}'.format(
     tag, attr, val))
 def given_tag_attr(context, args):
-    tag = context.etree.find('.//{}[@{}="{}"]'.format(args.tag,
-                                                      args.attr,
-                                                      args.val))
-    context.selected_tag = tag
+    elem = context.etree.find('.//{}[@{}="{}"]'.format(args.tag,
+                                                       args.attr,
+                                                       args.val))
+    context.referenced_elements = [elem]
 
 
 @RegexFuncStep.make(r'Do all the {} tags have a[n]? {} attribute\?'.format(
@@ -54,6 +60,7 @@ def all_tags_have_attr(context, args):
     tags = context.etree.xpath('.//{}[not(string(@{}))]'.format(args.tag,
                                                                 args.attr))
     if len(tags):
+        context.referenced_elements = tags
         return False
     else:
         return True

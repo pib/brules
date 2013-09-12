@@ -81,8 +81,8 @@ class HtmlHelpersTest(TestCase):
         self.rule.parse(rule)
         print(self.rule.steps)
         self.rule.run(etree=fromstring(html))
-        self.assertEquals(self.rule.context.selected_tag.tag, 'a')
-        self.assertEquals(self.rule.context.selected_tag.text, 'Foo')
+        self.assertEquals(self.rule.context.referenced_elements[0].tag, 'a')
+        self.assertEquals(self.rule.context.referenced_elements[0].text, 'Foo')
 
     def test_all_tag_have_atr(self):
         html = '''\
