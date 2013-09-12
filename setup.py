@@ -1,5 +1,5 @@
 import os
-from setuptools import setup
+from setuptools import setup, find_packages
 
 
 def read(fname):
@@ -19,7 +19,7 @@ setup(
     license="BSD",
     keywords="business rules parsing",
     url="http://packages.python.org/an_example_pypi_project",
-    packages=['brules', 'tests'],
+    packages=find_packages(),
     long_description=read('README.md'),
     classifiers=[
         "Development Status :: 3 - Alpha",
