@@ -27,12 +27,18 @@ def check_tag_exists(context, args):
 def check_tag_length(context, args):
     if args.tag_attr == 'attribute':
         # Does the content attribute have less than 160 characters?
-        txt = context.referenced_elements[0].attrib[args.name]
+        try:
+            txt = context.referenced_elements[0].attrib[args.name]
+        except AttributeError:
+            txt = ''
     else:
         # Does the title tag have less than 60 characters?
         elem = context.etree.find('.//' + args.name)
-        context.referenced_elements = [elem]
-        txt = elem.text_content()
+        if elem is not None:
+            context.referenced_elements = [elem]
+            txt = elem.text_content()
+        else:
+            txt = ''
 
     if args.chars_words == 'characters':
         tag_length = len(txt)
