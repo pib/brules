@@ -93,6 +93,10 @@ def print_results(rules, verbose):
         if verbose or rule.context.get('fail'):
             keylen = max(len(str(k)) for k in rule.context) + 1
             for k, v in rule.context.items():
+                try:
+                    v = v.format(**rule.context)
+                except:
+                    pass
                 print('  {}: {}'.format(str(k).ljust(keylen), v))
 
 
