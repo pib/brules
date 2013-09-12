@@ -83,3 +83,22 @@ class HtmlHelpersTest(TestCase):
         self.rule.run(etree=fromstring(html))
         self.assertEquals(self.rule.context.selected_tag.tag, 'a')
         self.assertEquals(self.rule.context.selected_tag.text, 'Foo')
+
+    def test_all_tag_have_atr(self):
+        html = '''\
+            <html><body>
+                <a href="/foo" class="a">foo</a><a class="b">noop</a>
+            </body></html>'''
+        rule = '''\
+            Do all the a tags have an href attribute?
+            If so, then set hrefs to: yes
+            If not, then set hrefs to: no
+            Do all the a tags have a class attribute?
+            If so, then set classes to: yes
+            If not, then set classes to: no
+        '''
+
+        self.rule.parse(rule)
+        self.rule.run(etree=fromstring(html))
+        self.assertEqual(self.rule.context.hrefs, 'no')
+        self.assertEqual(self.rule.context.classes, 'yes')

@@ -48,4 +48,16 @@ def given_tag_attr(context, args):
     context.selected_tag = tag
 
 
-html_step_set = StepSet(check_tag_exists, check_tag_length, given_tag_attr)
+@RegexFuncStep.make(r'Do all the {} tags have a[n]? {} attribute\?'.format(
+    tag, attr))
+def all_tags_have_attr(context, args):
+    tags = context.etree.xpath('.//{}[not(string(@{}))]'.format(args.tag,
+                                                                args.attr))
+    if len(tags):
+        return False
+    else:
+        return True
+
+
+html_step_set = StepSet(check_tag_exists, check_tag_length, given_tag_attr,
+                        all_tags_have_attr)
