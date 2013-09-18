@@ -29,7 +29,7 @@ def check_tag_length(context, args):
         # Does the content attribute have less than 160 characters?
         try:
             txt = context.referenced_elements[0].attrib[args.name]
-        except AttributeError:
+        except (AttributeError, KeyError):
             txt = ''
     else:
         # Does the title tag have less than 60 characters?

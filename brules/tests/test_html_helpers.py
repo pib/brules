@@ -67,22 +67,33 @@ class HtmlHelpersTest(TestCase):
             Does the b tag have more than 4 words?
             If so, then append to answers: yes
             If not, then append to answers: no
+
+            Does the nonexistant tag have more than 3 words?
+            If so, then append to answers: yes
+            If not, then append to answers: no
             """
         self.rule.parse(rule_txt)
         self.rule.run(etree=fromstring(html_txt))
         self.assertEqual(self.rule.context.answers,
-                         ['yes', 'yes', 'yes', 'no', 'no', 'no'])
+                         ['yes', 'yes', 'yes', 'no', 'no', 'no', 'no'])
 
     def test_given_tag_with_attr(self):
         html = '<html><a></a><a href="foo.html">Foo</a></html>'
         rule = ('Given the a tag with the attribute href=foo.html\n'
                 'Does the href attribute have less than 20 characters?')
+        rule2 = ('Given the a tag with the attribute href=foo.html\n'
+                 'Does the nope attribute have less than 20 characters?')
 
         self.rule.parse(rule)
-        print(self.rule.steps)
         self.rule.run(etree=fromstring(html))
         self.assertEquals(self.rule.context.referenced_elements[0].tag, 'a')
         self.assertEquals(self.rule.context.referenced_elements[0].text, 'Foo')
+        self.assertEquals(self.rule.context.last_return, True)
+
+        self.rule.parse(rule2)
+        self.rule.run(etree=fromstring(html))
+        self.assertEquals(self.rule.context.referenced_elements[0].text, 'Foo')
+        self.assertEquals(self.rule.context.last_return, True)
 
     def test_all_tag_have_atr(self):
         html = '''\

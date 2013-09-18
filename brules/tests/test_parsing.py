@@ -7,7 +7,7 @@ class ParsingTest(TestCase):
     def setUp(self):
         self.step_set = StepSet()
 
-    _ok = 'NOT REALLY A FUNCTION'
+    _ok = lambda ctx, args: True
 
     def test_plain_text_step(self):
         step = RegexFuncStep("I'm a step!", self._ok)
