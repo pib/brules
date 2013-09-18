@@ -14,6 +14,9 @@ class Context(MutableMapping):
     def __eq__(self, other):
         return self._data == other
 
+    def to_dict(self):
+        return self._data
+
     def __getitem__(self, key):
         try:
             return self._data[key]

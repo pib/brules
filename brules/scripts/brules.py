@@ -18,6 +18,7 @@ except ImportError:
 from importlib import import_module
 import json
 import logging
+import textwrap
 
 log = logging.getLogger(__name__)
 
@@ -97,7 +98,18 @@ def print_results(rules, verbose):
                     v = v.format(**rule.context)
                 except:
                     pass
-                print('  {}: {}'.format(str(k).ljust(keylen), v))
+                indent = ' ' * (keylen + 4)
+                if isinstance(v, list):
+                    v = ', '.join([str(i).replace(' ', '\a')
+                                  for i in v])
+                    v = '[' + v + ']'
+                    indent = indent + ' '
+
+                out = '{}: {}'.format(str(k).ljust(keylen), v)
+                out = textwrap.fill(out, 80, initial_indent='  ',
+                                    subsequent_indent=indent)
+                print(out.replace('\a', ' '))
+
 
 
 def write_results(rules, output):
@@ -108,6 +120,8 @@ def write_results(rules, output):
 
 class LaxEncoder(json.JSONEncoder):
     def default(self, obj):
+        if hasattr(obj, 'to_dict'):
+            return obj.to_dict()
         return repr(obj)
 
 
