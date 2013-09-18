@@ -43,12 +43,11 @@ class ContextTest(TestCase):
             def abc(self, context):
                 return context.ab + self._c
 
-        c = Context()
-        c.data_provider = AbcProvider('A', 'b', 'C')
+        c = Context(data_provider=AbcProvider('A', 'b', 'C'))
 
         self.assertEqual(c.abc, 'AbC')
 
-        c.data_provider = None
+        c._data_provider = None
         self.assertEqual(c.a, 'A')
         self.assertEqual(c.ab, 'Ab')
         self.assertEqual(c.abc, 'AbC')
