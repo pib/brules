@@ -54,3 +54,17 @@ class ContextTest(TestCase):
         del c['ab']
         self.assertNotIn('ab', c)
         self.assertEqual(len(c), 2)
+
+    def test_nested_context(self):
+        c = Context()
+        nc = Context(data_provider=c)
+
+        c.foo = 'hello'
+        self.assertEqual(nc.foo, 'hello')
+        c.foo = 'goodbye'
+        self.assertEqual(nc.foo, 'hello')
+        self.assertEqual(c.foo, 'goodbye')
+
+    def test_to_dict(self):
+        c = Context(foo='bar', bar='baz')
+        self.assertEqual(c.to_dict(), {'foo': 'bar', 'bar': 'baz'})
