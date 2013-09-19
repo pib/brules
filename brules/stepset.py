@@ -4,13 +4,15 @@ from .steps import RegexFuncStep
 
 class StepSet(object):
     def __init__(self, *steps):
-        self.context = Context()
         self._steps = list(steps)
 
-    def run(self, step_text=None, parsed_steps=None):
+    def run(self, step_text=None, parsed_steps=None, context=None):
+        context = context if context is not None else Context()
         steps = parsed_steps or self.parse(step_text)
         for args, step in steps:
-            self.context['last_return'] = step(self.context, args)
+            context['last_return'] = step(context, args)
+
+        return context
 
     def concat(self, other):
         new_rs = StepSet()

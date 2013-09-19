@@ -13,12 +13,18 @@ import yaml
 
 
 class Rule(object):
-    def __init__(self):
-        self.step_set = StepSet()
-        self.context = Context()
+    def __init__(self, parent=None):
+        if parent is None:
+            self.step_set = StepSet()
+            self.context = Context()
+        else:
+            self.step_set = parent.step_set
+            self.context = Context(data_provider=parent.context)
+
         self.metadata = Context()
         self.steps = []
         self.file_path = None
+
 
     def add_step(self, step):
         self.step_set.add_step(step)
@@ -27,9 +33,8 @@ class Rule(object):
         self.step_set = self.step_set.concat(step_set)
 
     def run(self, **extra_context):
-        self.step_set.context.update(extra_context)
-        self.step_set.run(parsed_steps=self.steps)
-        self.context = self.step_set.context
+        self.context.update(extra_context)
+        self.step_set.run(parsed_steps=self.steps, context=self.context)
 
     def load(self, path):
         content = open(path, 'r').read()
@@ -40,21 +45,15 @@ class Rule(object):
         rules = []
         rule_glob = join(path, '*{}'.format(rule_ext))
         for rulepath in glob.iglob(rule_glob):
-            rule = self.new_child()
+            rule = Rule(parent=self)
             rule.load(rulepath)
             rules.append(rule)
         return rules
 
-    def new_child(self):
-        rule = Rule()
-        rule.step_set = self.step_set
-        rule.step_set.context = Context(data_provider=self.context)
-        return rule
-
     def copy(self):
         rule = Rule()
+        rule.context = self.context.copy()
         rule.step_set = copy.copy(self.step_set)
-        rule.step_set.context = self.context.copy()
         return rule
 
     def parse(self, toparse):

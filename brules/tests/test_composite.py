@@ -45,7 +45,7 @@ if foo is bar then
              pred_step)
         ]
         self.assertEqual(steps, expected)
-        self.step_set.run(rule)
+        context = self.step_set.run(rule)
         expected = {
             'foo': 'bar',
             'c': 42,
@@ -56,4 +56,4 @@ if foo is bar then
             'y': 'bar',
             'last_return': None
         }
-        self.assertEqual(self.step_set.context, expected)
+        self.assertEqual(context, expected)

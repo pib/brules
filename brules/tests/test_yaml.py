@@ -23,12 +23,12 @@ class YamlTest(TestCase):
         expected = [({'foo': 'bar'}, self.yaml_step),
                     ({'bar': 'baz'}, self.yaml_step)]
         self.assertEqual(steps, expected)
-        self.step_set.run('foo: bar\n...\nbar: baz\n...')
+        context = self.step_set.run('foo: bar\n...\nbar: baz\n...')
         expected = {
             'foo': 'bar',
             'bar': 'baz'
         }
-        self.assertEqual(self.step_set.context.args, expected)
+        self.assertEqual(context.args, expected)
 
     def test_mixed_steps(self):
         re_step = RegexStep('%hello%')

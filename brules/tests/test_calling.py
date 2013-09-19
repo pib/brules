@@ -23,9 +23,9 @@ class CallingTest(TestCase):
 
         self.step_set.add_step(RFS('Set foo', set_foo))
         self.step_set.add_step(RFS('Set bar', set_bar))
-        self.step_set.run('Set foo\nSet bar')
-        self.assertEqual(self.step_set.context.foo, 'bar')
-        self.assertEqual(self.step_set.context.last_return, 'the end')
+        context = self.step_set.run('Set foo\nSet bar')
+        self.assertEqual(context.foo, 'bar')
+        self.assertEqual(context.last_return, 'the end')
 
     def test_run_with_args(self):
         def set_x_to_y(context, args):
@@ -71,7 +71,7 @@ class CallingTest(TestCase):
               a longer
                message.
             """)
-        self.step_set.run(lines)
-        self.assertEqual(self.step_set.context.messages,
+        context = self.step_set.run(lines)
+        self.assertEqual(context.messages,
                          ['Hey there. This message is lots of lines long.',
                           'This is also a longer message.'])

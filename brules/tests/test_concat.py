@@ -18,6 +18,6 @@ class ConcatTest(TestCase):
             ctx.step2 = True
 
         rs3 = rs1.concat(rs2)
-        rs3.run('Step 1\nStep 2')
-        self.assertTrue(rs3.context.step1)
-        self.assertTrue(rs3.context.step2)
+        context = rs3.run('Step 1\nStep 2')
+        self.assertTrue(context.step1)
+        self.assertTrue(context.step2)

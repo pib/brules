@@ -32,10 +32,10 @@ class BasicHelpersTest(TestCase):
             If not, then set insult to: Wow, you're so bad at math
              that you actually broke this program.
             """
-        self.stepset.run(rules)
-        self.assertEqual(self.stepset.context.answer,
+        context = self.stepset.run(rules)
+        self.assertEqual(context.answer,
                          'Ok. Who gave you the answer to that one?')
-        self.assertEqual(self.stepset.context.insult,
+        self.assertEqual(context.insult,
                          'You, sir, are bad at math.')
 
     def test_if_then_append(self):
@@ -57,10 +57,10 @@ class BasicHelpersTest(TestCase):
             If not, then append to insults: Wow, you're so bad at math
              that you actually broke this program.
             """
-        self.stepset.run(rules)
-        self.assertEqual(self.stepset.context.answers,
+        context = self.stepset.run(rules)
+        self.assertEqual(context.answers,
                          ['ok.', 'Ok. Who gave you the answer to that one?'])
-        self.assertEqual(self.stepset.context.insults,
+        self.assertEqual(context.insults,
                          ['You, sir, are bad at math.',
                           'I shall taunt you a second time!'])
 
@@ -84,9 +84,9 @@ class BasicHelpersTest(TestCase):
                 - wait, what?
               hmm: ok
             """
-        self.stepset.run(rules)
-        self.assertEqual(self.stepset.context.math, 'ok-ish')
-        self.assertEqual(self.stepset.context.level, 1)
-        self.assertEqual(self.stepset.context.numbers, [1, 2, 'wait, what?'])
-        self.assertEqual(self.stepset.context.hmm, 'ok')
-        self.assertNotIn('something', self.stepset.context)
+        context = self.stepset.run(rules)
+        self.assertEqual(context.math, 'ok-ish')
+        self.assertEqual(context.level, 1)
+        self.assertEqual(context.numbers, [1, 2, 'wait, what?'])
+        self.assertEqual(context.hmm, 'ok')
+        self.assertNotIn('something', context)

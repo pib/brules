@@ -84,8 +84,7 @@ class RuleTest(TestCase):
             'last_return': 'This bit: the step text.2',
             'extra_context_arg': 42
         }
-        self.assertEqual(self.rule.step_set.context, expected_ctx)
-        self.assertIs(self.rule.context, self.rule.step_set.context)
+        self.assertEqual(self.rule.context, expected_ctx)
 
     def test_load(self):
         file_path = join(dirname(__file__), 'rules', 'simple.rule')

@@ -93,9 +93,9 @@ def print_results(rules, verbose):
         print(status)
         if verbose or rule.context.get('fail'):
             keylen = max(len(str(k)) for k in rule.context) + 1
-            for k, v in rule.context.items():
+            for k, v in list(rule.context.items()):
                 try:
-                    v = v.format(**rule.context)
+                    v = v.format_map(rule.context)
                 except:
                     pass
                 indent = ' ' * (keylen + 4)
@@ -109,7 +109,6 @@ def print_results(rules, verbose):
                 out = textwrap.fill(out, 80, initial_indent='  ',
                                     subsequent_indent=indent)
                 print(out.replace('\a', ' '))
-
 
 
 def write_results(rules, output):

@@ -21,10 +21,10 @@ class DecoratorTest(TestCase):
             context.x = args[1]
             context.arb = True
 
-        self.step_set.run('Basic step\nArbitrary trout')
-        self.assertEqual(self.step_set.context.basic, True)
-        self.assertEqual(self.step_set.context.arb, True)
-        self.assertEqual(self.step_set.context.x, 'trout')
+        context = self.step_set.run('Basic step\nArbitrary trout')
+        self.assertEqual(context.basic, True)
+        self.assertEqual(context.arb, True)
+        self.assertEqual(context.x, 'trout')
 
     def test_multiline_step_decorator(self):
         @self.step_set.multiline_step(r'(?s)\s*"""(?P<quoted>.*?)"""')
@@ -45,10 +45,10 @@ class DecoratorTest(TestCase):
                       is in quotes """
             ''')
 
-        self.step_set.run(lines)
+        context = self.step_set.run(lines)
         self.assertEqual(
-            self.step_set.context.inparens,
+            context.inparens,
             'This bit here is in parens. """ This bit is still in '
             'parens, despite the fact that it is also in quotes. """')
-        self.assertEqual(self.step_set.context.quoted,
+        self.assertEqual(context.quoted,
                          'This bit here, however, is in quotes')

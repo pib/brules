@@ -2,20 +2,51 @@ from collections import MutableMapping
 from future.utils.six import text_type
 from functools import partial
 
+# ''.format_map() in Python 2.x
+# from https://gist.github.com/zed/1384338
+try:
+    ''.format_map({})
+except AttributeError:  # Python < 3.2
+    import string
+
+    def format_map(format_string, mapping, _format=string.Formatter().vformat):
+        return _format(format_string, None, mapping)
+    del string
+
+    import ctypes as c
+
+    class PyObject_HEAD(c.Structure):
+        _fields_ = [
+            ('HEAD', c.c_ubyte * (object.__basicsize__ -  c.sizeof(c.c_void_p))),
+            ('ob_type', c.c_void_p)
+        ]
+
+    _get_dict = c.pythonapi._PyObject_GetDictPtr
+    _get_dict.restype = c.POINTER(c.py_object)
+    _get_dict.argtypes = [c.py_object]
+
+    def get_dict(obj):
+        return _get_dict(obj).contents.value
+
+    get_dict(str)['format_map'] = format_map
+else:  # Python 3.2+
+    def format_map(format_string, mapping):
+        return format_string.format_map(mapping)
+
 
 class UnmatchedStepError(Exception):
     pass
 
 
 class Context(MutableMapping):
-    def __init__(self, *args, data_provider=None, **kwargs):
+    def __init__(self, *args, **kwargs):
+        self._data_provider = kwargs.pop('data_provider', None)
         self._data = dict(*args, **kwargs)
-        self._data_provider = data_provider
         self._data_points = None
 
     def get_data_points(self):
         if self._data_points is None:
-            if 'data_provider' in self.__dict__:
+            if self._data_provider is not None:
                 data_points = self._data_provider.get_data_points()
             else:
                 data_points = {}
@@ -32,8 +63,11 @@ class Context(MutableMapping):
     def __eq__(self, other):
         return self._data == other
 
-    def to_dict(self):
-        return self._data
+    def to_dict(self, recurse=False):
+        if recurse:
+            return {k: v(self) for k, v in self.get_data_points().items()}
+        else:
+            return self._data
 
     def __getitem__(self, key):
         try:
@@ -73,11 +107,6 @@ class Context(MutableMapping):
             self.__dict__[name] = value
         else:
             self[name] = value
-
-    def copy(self):
-        new_inst = self.__class__()
-        new_inst.update(self._data.copy())
-        return new_inst
 
 
 def combined_match_dict(match):
