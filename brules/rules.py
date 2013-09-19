@@ -40,10 +40,16 @@ class Rule(object):
         rules = []
         rule_glob = join(path, '*{}'.format(rule_ext))
         for rulepath in glob.iglob(rule_glob):
-            rule = self.copy()
+            rule = self.new_child()
             rule.load(rulepath)
             rules.append(rule)
         return rules
+
+    def new_child(self):
+        rule = Rule()
+        rule.step_set = self.step_set
+        rule.step_set.context = Context(data_provider=self.context)
+        return rule
 
     def copy(self):
         rule = Rule()
