@@ -9,7 +9,7 @@ from brules.helpers.basic import basic_step_set
 from brules.helpers.html import html_step_set
 
 from argparse import ArgumentParser
-from lxml.html import parse
+from lxml.html import fromstring
 try:
     from urllib.request import urlopen
 except ImportError:
@@ -76,7 +76,7 @@ def load_url(url):
     req = urlopen(url)
     if req.geturl() != url:
         log.debug('Redirected to %s', req.geturl())
-    return parse(req)
+    return fromstring(req.read())
 
 
 def run_rules(rules):
