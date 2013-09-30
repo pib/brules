@@ -12,7 +12,7 @@ dependency_links = read('test_requirements.txt').split('\n')
 
 setup(
     name="brules",
-    version="0.0.1",
+    version="0.0.2",
     author="Paul Bonser",
     author_email="misterpib@gmail.com",
     description="A tool to help you parse and process text-based business rules.",
