@@ -19,7 +19,8 @@ class Rule(object):
             self.context = Context()
         else:
             self.step_set = parent.step_set
-            self.context = Context(data_provider=parent.context)
+            self.context = parent.context.__class__(
+                data_provider=parent.context)
 
         self.metadata = Context()
         self.steps = []
