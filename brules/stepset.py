@@ -3,6 +3,7 @@ from .steps import RegexFuncStep
 
 
 class StepSet(object):
+
     def __init__(self, *steps):
         self._steps = list(steps)
 
@@ -60,3 +61,6 @@ class StepSet(object):
                 raise UnmatchedStepError(
                     'No matching steps for "{}"'.format(line))
         return matches
+
+    def doc(self):
+        """ Generate documentation for the steps in this StepSet """
