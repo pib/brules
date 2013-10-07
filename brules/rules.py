@@ -13,6 +13,7 @@ import yaml
 
 
 class Rule(object):
+
     def __init__(self, parent=None):
         if parent is None:
             self.step_set = StepSet()
@@ -25,7 +26,6 @@ class Rule(object):
         self.metadata = Context()
         self.steps = []
         self.file_path = None
-
 
     def add_step(self, step):
         self.step_set.add_step(step)
@@ -42,14 +42,21 @@ class Rule(object):
         self.parse(content)
         self.file_path = path
 
-    def load_directory(self, path, rule_ext='.rule'):
+    def load_directory(self, path, filter_by=None, rule_ext='.rule'):
         rules = []
         rule_glob = join(path, '*{}'.format(rule_ext))
         for rulepath in glob.iglob(rule_glob):
             rule = Rule(parent=self)
             rule.load(rulepath)
-            rules.append(rule)
+            if self._rule_matches_filter(rule, filter_by):
+                rules.append(rule)
         return rules
+
+    def _rule_matches_filter(self, rule, filter_by):
+        for attr, val in filter_by.items():
+            if rule.metadata.get(attr, '') != val:
+                return False
+        return True
 
     def copy(self):
         rule = Rule()
