@@ -48,7 +48,7 @@ class Rule(object):
         for rulepath in glob.iglob(rule_glob):
             rule = Rule(parent=self)
             rule.load(rulepath)
-            if self._rule_matches_filter(rule, filter_by):
+            if not filter_by or self._rule_matches_filter(rule, filter_by):
                 rules.append(rule)
         return rules
 
