@@ -48,7 +48,7 @@ class StepSet(object):
             match_found = False
             for step in self._steps:
                 try:
-                    match, i = step.parse(toparse, i)
+                    match, i = step.parse(self, toparse, i)
                     matches.append(match)
                     match_found = True
                 except UnmatchedStepError:
