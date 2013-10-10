@@ -17,7 +17,8 @@ except AttributeError:  # Python < 3.2
 
     class PyObject_HEAD(c.Structure):
         _fields_ = [
-            ('HEAD', c.c_ubyte * (object.__basicsize__ -  c.sizeof(c.c_void_p))),
+            ('HEAD', c.c_ubyte *
+             (object.__basicsize__ - c.sizeof(c.c_void_p))),
             ('ob_type', c.c_void_p)
         ]
 
@@ -39,6 +40,7 @@ class UnmatchedStepError(Exception):
 
 
 class Context(MutableMapping):
+
     def __init__(self, *args, **kwargs):
         self._data_provider = kwargs.pop('data_provider', None)
         self._data = dict(*args, **kwargs)
@@ -107,6 +109,9 @@ class Context(MutableMapping):
             self.__dict__[name] = value
         else:
             self[name] = value
+
+    def __repr__(self):
+        return '{}({})'.format(self.__class__.__name__, self._data)
 
 
 def combined_match_dict(match):

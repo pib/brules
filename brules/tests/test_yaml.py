@@ -4,13 +4,14 @@ from brules.steps import RegexStep, YamlStep, YamlFuncStep
 
 
 class YamlTest(TestCase):
+
+    def yaml_func(self, context, args):
+        context.setdefault('args', {}).update(args)
+
     def setUp(self):
         self.step_set = StepSet()
 
-        def yaml_func(context, args):
-            context.setdefault('args', {}).update(args)
-
-        self.yaml_step = YamlFuncStep(yaml_func)
+        self.yaml_step = YamlFuncStep(self.yaml_func)
         self.step_set.add_step(self.yaml_step)
 
     def test_yaml_step(self):

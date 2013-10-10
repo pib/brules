@@ -92,6 +92,24 @@ class RegexFuncStep(RegexStep):
             self.regex.pattern)
 
 
+class PrefixStep(RegexStep):
+
+    """ A simple step which matches a regex and returns True
+
+    For use with composite steps to require a prefix before another
+    step. For example, to add a prefix before a YamlFuncStep.
+
+    Defaults to multiline=True so it can match in the middle of a
+    line.
+    """
+
+    def __init__(self, regex, multiline=True):
+        super(PrefixStep, self).__init__(regex, multiline)
+
+    def __call__(self, context, args):
+        return True
+
+
 class YamlStep(Step):
 
     def parse(self, step_set, toparse, start_index):
@@ -129,32 +147,57 @@ class YamlFuncStep(YamlStep):
         return cls(func)
 
 
-class PredicateStep(Step):
+class CompositeStep(Step):
+
+    def __init__(self, first_step, second_step):
+        self.first_step = first_step
+        self.second_step = second_step
+
+    def parse(self, step_set, toparse, start_index):
+        (args, _), i = self.first_step.parse(step_set, toparse, start_index)
+        (args2, _), i = self.second_step.parse(step_set, toparse, i)
+        args.update(args2)
+        return (args, self), i
+
+    def __call__(self, context, args):
+        context.last_return = self.first_step(context, args)
+        self.second_step(context, args)
+
+
+class PredicateStep(CompositeStep):
 
     """ A composite of two other steps, a predicate step, and a
     conditional step.
 
     When parsing, both steps must parse, or the step doesn't match.
 
+    If a conditional step is not specified, the parse method will call
+    step_set.parse and create a new PredicateStep with the returned
+    instance as its conditional step.
+
     When running, if the predicate step returns a truthy value, then
     the conditional step is run. Otherwise, the conditional step is
     not run.
     """
 
-    def __init__(self, predicate, conditional):
-        self.predicate = predicate
-        self.conditional = conditional
+    def __init__(self, first_step, second_step=None):
+        super(PredicateStep, self).__init__(first_step, second_step)
 
     def parse(self, step_set, toparse, start_index):
-        (args, _), i = self.predicate.parse(step_set, toparse, start_index)
-        (args2, _), i = self.conditional.parse(step_set, toparse, i)
+        if self.second_step:
+            return super(PredicateStep, self).parse(step_set, toparse,
+                                                    start_index)
+
+        (args, _), i = self.first_step.parse(step_set, toparse, start_index)
+        (args2, second_step), i = step_set.parse_one(toparse, i)
         args.update(args2)
-        return (args, self), i
+
+        return (args, PredicateStep(self.first_step, second_step)), i
 
     def __call__(self, context, args):
-        last_return = context.last_return
+        last_return = context.get('last_return')
 
-        if self.predicate(context, args):
-            self.conditional(context, args)
+        if self.first_step(context, args):
+            self.second_step(context, args)
 
         return last_return

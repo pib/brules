@@ -1,9 +1,11 @@
 from unittest import TestCase
 from brules import StepSet
-from brules.steps import PredicateStep, RegexFuncStep, YamlFuncStep
+from brules.steps import (
+    CompositeStep, PredicateStep, PrefixStep, RegexFuncStep, YamlFuncStep)
 
 
 class CompositeTest(TestCase):
+
     def setUp(self):
         self.step_set = StepSet()
 
@@ -57,3 +59,46 @@ if foo is bar then
             'last_return': None
         }
         self.assertEqual(context, expected)
+
+    def test_recursive_parse_conditional(self):
+        def if_func(context, args):
+            return context.get(args[1]) == args[2]
+        if_step = RegexFuncStep(
+            r'\s*if (.+) is (\w+) ', if_func, multiline=True)
+
+        def set_from_yaml(context, args):
+            context.setdefault('args', {}).update(
+                {k: v for k, v in args.items() if isinstance(k, str)})
+        set_from_yaml_step = CompositeStep(PrefixStep('then set:'),
+                                           YamlFuncStep(set_from_yaml))
+        self.step_set.add_step(PredicateStep(if_step))
+        self.step_set.add_step(set_from_yaml_step)
+        rule = """
+               if a is b then set:
+                 x: blah
+                 y: 42
+
+               set a to b
+               if a is b then set:
+                 foo: x
+                 bar: 0
+               """
+        context = self.step_set.run(rule)
+        self.assertEqual(context.args, {'foo': 'x', 'bar': 0})
+
+    def test_yaml_prefix(self):
+        def yaml_func(context, args):
+            context.setdefault('args', {}).update(args)
+
+        yaml_step = YamlFuncStep(yaml_func)
+        prefix_step = PrefixStep('YAML!')
+        prefixed_yaml_step = CompositeStep(prefix_step, yaml_step)
+        self.step_set.add_step(prefixed_yaml_step)
+
+        rule = """YAML!
+                       a: foo
+                       b: bar
+                    """
+        expected = {'a': 'foo', 'b': 'bar'}
+        context = self.step_set.run(rule)
+        self.assertEqual(context.args, expected)
