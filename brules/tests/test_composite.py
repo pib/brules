@@ -1,7 +1,9 @@
 from unittest import TestCase
 from brules import StepSet
+from brules.common import Context
 from brules.steps import (
-    CompositeStep, PredicateStep, PrefixStep, RegexFuncStep, YamlFuncStep)
+    CompositeStep, LoopStep, PredicateStep, PrefixStep, RegexFuncStep,
+    YamlFuncStep)
 
 
 class CompositeTest(TestCase):
@@ -102,3 +104,15 @@ if foo is bar then
         expected = {'a': 'foo', 'b': 'bar'}
         context = self.step_set.run(rule)
         self.assertEqual(context.args, expected)
+
+    def test_loop_step(self):
+        self.step_set.add_step(LoopStep('For each thing ', 'things'))
+
+        @RegexFuncStep.make('increment')
+        def increment(context, args):
+            context[context.it] = context.get(context.it, 0) + 1
+        self.step_set.add_step(increment)
+
+        rule = "For each thing increment"
+
+        self.step_set.run(rule, context=Context(things=[]))

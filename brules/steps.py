@@ -4,6 +4,7 @@ from future import standard_library
 from future.builtins import *
 
 from .common import UnmatchedStepError, combined_match_dict, u
+from copy import copy
 from io import StringIO
 import re
 import yaml
@@ -37,7 +38,7 @@ class RegexStep(Step):
             end = match.end()
             return (match_dict, self), end
         line = toparse[start_index:].split('\n', 1)[0]
-        raise UnmatchedStepError('Step does not match at "{}"'.format(line))
+        raise UnmatchedStepError(line)
 
     def parse_line(self, toparse, start_index):
         end = len(toparse)
@@ -58,7 +59,7 @@ class RegexStep(Step):
                 match_dict['suffix_content'] = line[end:]
 
             return (match_dict, self), line_end + 1
-        raise UnmatchedStepError('Step does not match at "{}"'.format(line))
+        raise UnmatchedStepError(line)
 
     def __repr__(self):
         return '<{}.{} "{}">'.format(self.__class__.__module__,
@@ -121,8 +122,7 @@ class YamlStep(Step):
             val = loader.get_data()
         except yaml.error.YAMLError:
             line = toparse[start_index:].split('\n', 1)[0]
-            raise UnmatchedStepError(
-                'Step does not match at "{}"'.format(line))
+            raise UnmatchedStepError(line)
 
         if loader.tokens:
             val_end = loader.tokens[0].start_mark.index
@@ -192,7 +192,9 @@ class PredicateStep(CompositeStep):
         (args2, second_step), i = step_set.parse_one(toparse, i)
         args.update(args2)
 
-        return (args, PredicateStep(self.first_step, second_step)), i
+        step = copy(self)
+        step.second_step = second_step
+        return (args, step), i
 
     def __call__(self, context, args):
         last_return = context.get('last_return')
@@ -201,3 +203,18 @@ class PredicateStep(CompositeStep):
             self.second_step(context, args)
 
         return last_return
+
+
+class LoopStep(PredicateStep):
+
+    def __init__(self, regex, context_var, loop_step=None, multiline=True):
+        prefix_step = PrefixStep(regex, multiline)
+        super(LoopStep, self).__init__(prefix_step, loop_step)
+        self.context_var = context_var
+
+    def __call__(self, context, args):
+        for it in context.get(self.context_var, []):
+            context.it = it
+            context.last_return = self.second_step(context, args)
+
+        return context.get('last_return')

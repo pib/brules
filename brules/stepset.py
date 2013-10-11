@@ -45,9 +45,15 @@ class StepSet(object):
         i = start_index
         end = len(toparse)
         while i < end:
-            match, i = self.parse_one(toparse, i)
-            if match is not None:
+            try:
+                match, i = self.parse_one(toparse, i)
                 matches.append(match)
+            except UnmatchedStepError as e:
+                if e.line.strip() == '':
+                    i += len(e.line) + 1
+                else:
+                    raise
+
         return matches
 
     def parse_one(self, toparse, start_index):
@@ -58,11 +64,7 @@ class StepSet(object):
                 continue
 
         line = toparse[start_index:].split('\n', 1)[0]
-        if line.strip() == '':
-            return None, start_index + len(line) + 1
-
-        raise UnmatchedStepError(
-            'No matching steps for "{}"'.format(line))
+        raise UnmatchedStepError(line)
 
     def doc(self):
         """ Generate documentation for the steps in this StepSet """

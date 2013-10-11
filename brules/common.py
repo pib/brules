@@ -36,7 +36,10 @@ else:  # Python 3.2+
 
 
 class UnmatchedStepError(Exception):
-    pass
+
+    def __init__(self, *args):
+        super(UnmatchedStepError, self).__init__(*args)
+        self.line = self.args[0]
 
 
 class Context(MutableMapping):
