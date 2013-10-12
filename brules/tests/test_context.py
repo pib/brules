@@ -4,6 +4,7 @@ from unittest import TestCase
 
 
 class ContextTest(TestCase):
+
     def setUp(self):
         self.d = Context({'foo': 'bar', 'bar': 'baz'})
 
@@ -26,6 +27,7 @@ class ContextTest(TestCase):
         provider and cache them within its own data.
         """
         class AbcProvider(Provider):
+
             def __init__(self, a, b, c):
                 self._a = a
                 self._b = b
@@ -68,3 +70,15 @@ class ContextTest(TestCase):
     def test_to_dict(self):
         c = Context(foo='bar', bar='baz')
         self.assertEqual(c.to_dict(), {'foo': 'bar', 'bar': 'baz'})
+
+    def test_backward_propagation(self):
+        c1 = Context()
+        c2 = Context(data_provider=c1)
+        c3 = Context(data_provider=c2)
+        c4 = Context(data_provider=c3)
+
+        c4.msg = 'hello'
+        c4.get_data_points()
+
+        self.assertEqual(c2.get('msg'), None)
+        self.assertEqual(c3.get('msg'), None)

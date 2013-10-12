@@ -59,7 +59,7 @@ class Context(MutableMapping):
                 data_points[key] = partial(self._get_data_point, key)
             self._data_points = data_points
 
-        return self._data_points
+        return self._data_points.copy()
 
     # pylint: disable=W0613
     def _get_data_point(self, key, context):
